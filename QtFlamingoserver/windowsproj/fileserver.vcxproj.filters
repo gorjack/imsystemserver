@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="fileserversrc">
+      <UniqueIdentifier>{c0dc0a70-c533-486c-b6a9-f61f7f2dd741}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{84f3d3f1-22cb-4172-b155-a4a704aef0c0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\utils\DaemonRun.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils\MD5.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils\StringUtil.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils\URLEncodeUtil.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileserversrc\FileManager.cpp">
+      <Filter>fileserversrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileserversrc\FileServer.cpp">
+      <Filter>fileserversrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileserversrc\FileSession.cpp">
+      <Filter>fileserversrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileserversrc\main.cpp">
+      <Filter>fileserversrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileserversrc\TcpSession.cpp">
+      <Filter>fileserversrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils\UUIDGenerator.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\utils\DaemonRun.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils\MD5.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils\StringUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils\URLEncodeUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fileserversrc\FileManager.h">
+      <Filter>fileserversrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fileserversrc\FileMsg.h">
+      <Filter>fileserversrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fileserversrc\FileServer.h">
+      <Filter>fileserversrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fileserversrc\FileSession.h">
+      <Filter>fileserversrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fileserversrc\TcpSession.h">
+      <Filter>fileserversrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils\UUIDGenerator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
