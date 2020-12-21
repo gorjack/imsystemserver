@@ -206,7 +206,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>./$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalDependencies>libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\ForHood\flamingo\flamingoserver\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)mysql-5.1.73-win32\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
