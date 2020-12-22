@@ -111,13 +111,21 @@ int main(int argc, char* argv[])
     closedir(dp);
 
     logFileFullPath = logfilepath;
+#else
+    const char* logfilepath = config.getConfigName("logfiledir");
+    if (logfilepath == NULL)
+    {
+        LOGF("logdir is not set in config file");
+        return 1;
+    }
+    logFileFullPath = logfilepath;
 #endif
 
     const char* logfilename = config.getConfigName("logfilename");
     logFileFullPath += logfilename;
 
 //#ifdef _DEBUG
-//    CAsyncLog::init();
+    //CAsyncLog::init();
 //#else
     CAsyncLog::init(logFileFullPath.c_str());
 //#endif
@@ -154,6 +162,7 @@ int main(int argc, char* argv[])
 
     g_mainLoop.loop();
 
+    CAsyncLog::uninit();
     LOGI("exit chatserver.");
 
     return 0;
