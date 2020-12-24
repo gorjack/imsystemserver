@@ -1,4 +1,4 @@
-#include "DatabaseMysql.h"
+﻿#include "DatabaseMysql.h"
 #include <fstream>
 #include <stdarg.h>
 #include <string.h>
@@ -192,9 +192,8 @@ bool CDatabaseMysql::execute(const char* sql)
             }
             else
             {
-                //LOGE << "SQL: " << sql;
-                //LOGE << "query ERROR: " << mysql_error(m_Mysql);
-                LOGE("sql error: %s, sql: %s", mysql_error(m_Mysql), sql);
+                const char* strErr = mysql_error(m_Mysql);
+                LOGE("sql error: %s, sql: %s", strErr, sql);
             }
             return false;
         }

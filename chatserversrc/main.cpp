@@ -118,6 +118,15 @@ int main(int argc, char* argv[])
         LOGF("logdir is not set in config file");
         return 1;
     }
+
+    if (!PathFileExistsA(logfilepath))
+    {
+        if (!CreateDirectoryA(logfilepath, NULL))
+        {
+            return false;
+        }
+    }
+
     logFileFullPath = logfilepath;
 #endif
 
