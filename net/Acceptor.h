@@ -22,27 +22,26 @@ namespace net
         Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
         ~Acceptor();
 
-        //设置新连接到来的回调函数
         void setNewConnectionCallback(const NewConnectionCallback& cb)
         {
-            newConnectionCallback_ = cb;
+            m_pNewConnectionCallback = cb;
         }
 
-        bool listenning() const { return listenning_; }
+        bool listenning() const { return m_bListenning; }
         void listen();
 
     private:
         void handleRead();
 
     private:
-        EventLoop*            loop_;
-        Socket                acceptSocket_;
-        Channel               acceptChannel_;
-        NewConnectionCallback newConnectionCallback_;
-        bool                  listenning_;
+        EventLoop*            m_pLoop;
+        Socket                m_objAcceptSocket;
+        Channel               m_objAcceptChannel;
+        NewConnectionCallback m_pNewConnectionCallback;
+        bool                  m_bListenning;
 
 #ifndef WIN32
-        int                   idleFd_;
+        int                   m_nIdleFd;
 #endif
     };
 

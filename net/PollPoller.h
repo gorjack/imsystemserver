@@ -36,9 +36,9 @@ namespace net
         typedef std::vector<struct pollfd>  PollFdList;
         typedef std::map<int, Channel*>     ChannelMap;
 
-        ChannelMap                          channels_;
-        PollFdList                          pollfds_;
-        EventLoop*                          ownerLoop_;
+        ChannelMap                          m_mapChannels;
+        PollFdList                          m_vecPollfds;
+        EventLoop*                          m_pOwnerLoop;
     };
 
 }

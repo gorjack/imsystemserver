@@ -1,6 +1,6 @@
 /** 
- * 即时通讯的业务逻辑都统一放在这里，BusinessLogic.h
- * zhangyl 2018.05.16
+ * BusinessLogic.h
+ * GJ 2024.11.30
  */
 #ifndef __BUSSINESS_LOGIC_H__
 #define __BUSSINESS_LOGIC_H__

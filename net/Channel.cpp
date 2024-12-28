@@ -8,17 +8,17 @@
 
 using namespace net;
 
-const int Channel::kNoneEvent = 0;
-const int Channel::kReadEvent = XPOLLIN | XPOLLPRI;
-const int Channel::kWriteEvent = XPOLLOUT;
+const int Channel::m_sNoneEvent = 0;
+const int Channel::m_sReadEvent = XPOLLIN | XPOLLPRI;
+const int Channel::m_sWriteEvent = XPOLLOUT;
 
-Channel::Channel(EventLoop* loop, int fd__): loop_(loop),
-                                            fd_(fd__),
-                                            events_(0),
-                                            revents_(0),
-                                            index_(-1),
-                                            logHup_(true),
-                                            tied_(false)/*,
+Channel::Channel(EventLoop* loop, int fd__): m_pLoop(loop),
+                                            m_cnFd(fd__),
+                                            m_nEvents(0),
+                                            m_Revents(0),
+                                            m_nIndex(-1),
+                                            m_bLogHup(true),
+                                            m_bTied(false)/*,
                                             eventHandling_(false),
                                             addedToLoop_(false)
                                             */
@@ -29,54 +29,54 @@ Channel::~Channel()
 {
 	//assert(!eventHandling_);
 	//assert(!addedToLoop_);
-	if (loop_->isInLoopThread())
+	if (m_pLoop->isInLoopThread())
 	{
-		//assert(!loop_->hasChannel(this));
+		//assert(!m_pLoop->hasChannel(this));
 	}
 }
 
 void Channel::tie(const std::shared_ptr<void>& obj)
 {
-	tie_ = obj;
-	tied_ = true;
+	m_pTie = obj;
+	m_bTied = true;
 }
 
 bool Channel::enableReading() 
 { 
-    events_ |= kReadEvent;
+    m_nEvents |= m_sReadEvent;
     return update();
 }
 
 bool Channel::disableReading()
 {
-    events_ &= ~kReadEvent; 
+    m_nEvents &= ~m_sReadEvent; 
     
     return update();
 }
 
 bool Channel::enableWriting() 
 {
-    events_ |= kWriteEvent; 
+    m_nEvents |= m_sWriteEvent; 
     
     return update(); 
 }
 
 bool Channel::disableWriting()
 { 
-    events_ &= ~kWriteEvent; 
+    m_nEvents &= ~m_sWriteEvent; 
     return update();
 }
 
 bool Channel::disableAll()
 { 
-    events_ = kNoneEvent; 
+    m_nEvents = m_sNoneEvent; 
     return update(); 
 }
 
 bool Channel::update()
 {
 	//addedToLoop_ = true;
-	return loop_->updateChannel(this);
+	return m_pLoop->updateChannel(this);
 }
 
 void Channel::remove()
@@ -84,15 +84,15 @@ void Channel::remove()
 	if (!isNoneEvent())
         return;
 	//addedToLoop_ = false;
-	loop_->removeChannel(this);
+	m_pLoop->removeChannel(this);
 }
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
 	std::shared_ptr<void> guard;
-	if (tied_)
+	if (m_bTied)
 	{
-		guard = tie_.lock();
+		guard = m_pTie.lock();
 		if (guard)
 		{
 			handleEventWithGuard(receiveTime);
@@ -106,56 +106,36 @@ void Channel::handleEvent(Timestamp receiveTime)
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
-	//eventHandling_ = true;
-    /*
-    XPOLLIN ，读事件
-    XPOLLPRI，读事件，但表示紧急数据，例如tcp socket的带外数据
-    POLLRDNORM , 读事件，表示有普通数据可读　　　
-    POLLRDBAND ,　读事件，表示有优先数据可读　　　　
-    XPOLLOUT，写事件
-    POLLWRNORM , 写事件，表示有普通数据可写
-    POLLWRBAND ,　写事件，表示有优先数据可写　　　   　　　　
-    XPOLLRDHUP (since Linux 2.6.17)，Stream socket的一端关闭了连接（注意是stream socket，我们知道还有raw socket,dgram socket），或者是写端关闭了连接，如果要使用这个事件，必须定义_GNU_SOURCE 宏。这个事件可以用来判断链路是否发生异常（当然更通用的方法是使用心跳机制）。要使用这个事件，得这样包含头文件：
-    　　#define _GNU_SOURCE
-      　　#include <poll.h>
-    XPOLLERR，仅用于内核设置传出参数revents，表示设备发生错误
-    XPOLLHUP，仅用于内核设置传出参数revents，表示设备被挂起，如果poll监听的fd是socket，表示这个socket并没有在网络上建立连接，比如说只调用了socket()函数，但是没有进行connect。
-    XPOLLNVAL，仅用于内核设置传出参数revents，表示非法请求文件描述符fd没有打开
-    */
-	LOGD(reventsToString().c_str());
-	if ((revents_ & XPOLLHUP) && !(revents_ & XPOLLIN))
 	{
-		if (logHup_)
-		{
+		if (m_bLogHup)  
+		{ 
 			LOGW("Channel::handle_event() XPOLLHUP");
 		}
-		if (closeCallback_) closeCallback_();
+		if (m_pCloseCallback)
+			m_pCloseCallback();
 	}
 
-	if (revents_ & XPOLLNVAL)
+	if (m_Revents & XPOLLNVAL)
 	{
 		LOGW("Channel::handle_event() XPOLLNVAL");
 	}
 
-	if (revents_ & (XPOLLERR | XPOLLNVAL))
+	if (m_Revents & (XPOLLERR | XPOLLNVAL))
 	{
-		if (errorCallback_) 
-            errorCallback_();
+		if (m_pErrorCallback) 
+            m_pErrorCallback();
 	}
     
-	if (revents_ & (XPOLLIN | XPOLLPRI | XPOLLRDHUP))
+	if (m_Revents & (XPOLLIN | XPOLLPRI | XPOLLRDHUP))
 	{
-		//当是侦听socket时，readCallback_指向Acceptor::handleRead
-        //当是客户端socket时，调用TcpConnection::handleRead 
-        if (readCallback_) 
-            readCallback_(receiveTime);
+        if (m_pReadCallback) 
+            m_pReadCallback(receiveTime);
 	}
 
-	if (revents_ & XPOLLOUT)
+	if (m_Revents & XPOLLOUT)
 	{
-		//如果是连接状态服的socket，则writeCallback_指向Connector::handleWrite()
-        if (writeCallback_) 
-            writeCallback_();
+        if (m_pWriteCallback) 
+            m_pWriteCallback();
 	}
 	//eventHandling_ = false;
 }
@@ -163,20 +143,20 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
 string Channel::reventsToString() const
 {
 	std::ostringstream oss;
-	oss << fd_ << ": ";
-	if (revents_ & XPOLLIN)
+	oss << m_cnFd << ": ";
+	if (m_Revents & XPOLLIN)
 		oss << "IN ";
-	if (revents_ & XPOLLPRI)
+	if (m_Revents & XPOLLPRI)
 		oss << "PRI ";
-	if (revents_ & XPOLLOUT)
+	if (m_Revents & XPOLLOUT)
 		oss << "OUT ";
-	if (revents_ & XPOLLHUP)
+	if (m_Revents & XPOLLHUP)
 		oss << "HUP ";
-	if (revents_ & XPOLLRDHUP)
+	if (m_Revents & XPOLLRDHUP)
 		oss << "RDHUP ";
-	if (revents_ & XPOLLERR)
+	if (m_Revents & XPOLLERR)
 		oss << "ERR ";
-	if (revents_ & XPOLLNVAL)
+	if (m_Revents & XPOLLNVAL)
 		oss << "NVAL ";
 
 	return oss.str().c_str();

@@ -87,6 +87,6 @@ bool InetAddress::resolve(const std::string& hostname, InetAddress* out)
 	}
 
 #endif
-    //TODO: Windows上重新实现一下
+    //TODO: Windows
 	return false;
 }

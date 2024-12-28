@@ -21,7 +21,7 @@ public:
     MonitorSession& operator =(const MonitorSession& rhs) = delete;
 
 public:
-    //有数据可读, 会被多个工作loop调用
+    //will be called by multiple work loops if have data
     void onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBuffer, Timestamp receivTime);
 
     std::shared_ptr<TcpConnection> getConnectionPtr()

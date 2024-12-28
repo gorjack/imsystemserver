@@ -1,6 +1,5 @@
 /**
- *  服务器主服务类，IMServer.cpp
- *  zhangyl 2017.03.09
+ *  IMServer.cpp
  **/
 #include "ChatServer.h"
 
@@ -20,7 +19,6 @@ bool ChatServer::init(const char* ip, short port, EventLoop* loop)
     InetAddress addr(ip, port);
     m_server.reset(new TcpServer(loop, addr, "FLAMINGO-SERVER", TcpServer::kReusePort));
     m_server->setConnectionCallback(std::bind(&ChatServer::onConnected, this, std::placeholders::_1));
-    //启动侦听
     m_server->start(6);
 
     return true;
@@ -62,11 +60,8 @@ void ChatServer::onConnected(std::shared_ptr<TcpConnection> conn)
 
 void ChatServer::onDisconnected(const std::shared_ptr<TcpConnection>& conn)
 {
-    //是否有用户下线
-    //bool bUserOffline = false;
     UserManager& userManager = Singleton<UserManager>::Instance();
 
-    //TODO: 这样的代码逻辑太混乱，需要优化
     std::lock_guard<std::mutex> guard(m_sessionMutex);
     for (auto iter = m_sessions.begin(); iter != m_sessions.end(); ++iter)
     {
@@ -76,13 +71,10 @@ void ChatServer::onDisconnected(const std::shared_ptr<TcpConnection>& conn)
             break;
         }
         
-        //通过比对connection对象找到对应的session
         if ((*iter)->getConnectionPtr() == conn)
         {
-            //该Session不是之前被踢下线的有效Session，才认为是正常下线，才给其好友推送其下线消息
             if ((*iter)->isSessionValid())
             { 
-                //遍历其在线好友，给其好友推送其下线消息
                 std::list<User> friends;
                 int32_t offlineUserId = (*iter)->getUserId();
                 userManager.getFriendInfoByUserId(offlineUserId, friends);
@@ -90,7 +82,6 @@ void ChatServer::onDisconnected(const std::shared_ptr<TcpConnection>& conn)
                 {
                     for (auto& iter3 : m_sessions)
                     {
-                        //该好友是否在线（在线会存在session）
                         if (iter2.userid == iter3->getUserId())
                         {
                             iter3->sendUserStatusChangeMsg(offlineUserId, 2);
@@ -105,11 +96,7 @@ void ChatServer::onDisconnected(const std::shared_ptr<TcpConnection>& conn)
                 LOGI("Session is invalid, userid=%d", (*iter)->getUserId());
             }
             
-            //停掉该Session的掉线检测
-            //(*iter)->DisableHeartbaetCheck();
-            //用户下线
             m_sessions.erase(iter);
-            //bUserOffline = true;
             LOGI("client disconnected: %s", conn->peerAddress().toIpPort().c_str());
             break;
         }
@@ -172,6 +159,7 @@ int32_t ChatServer::getUserStatusByUserId(int32_t userid)
     return 0;
 }
 
+//return device type
 int32_t ChatServer::getUserClientTypeByUserId(int32_t userid)
 {
     std::lock_guard<std::mutex> guard(m_sessionMutex);
@@ -182,7 +170,6 @@ int32_t ChatServer::getUserClientTypeByUserId(int32_t userid)
         if (iter->getUserId() == userid)
         {   
             clientType = iter->getUserClientType();
-            //电脑在线直接返回电脑在线状态
             if (clientType == CLIENT_TYPE_PC)
                 return clientType;
             else if (clientType == CLIENT_TYPE_ANDROID || clientType == CLIENT_TYPE_IOS)
@@ -190,7 +177,6 @@ int32_t ChatServer::getUserClientTypeByUserId(int32_t userid)
         }
     }
 
-    //只有手机在线才返回手机在线状态
     if (bMobileOnline)
         return clientType;
 

@@ -1,6 +1,5 @@
 /**
  * ChatSession.cpp
- * zhangyl, 2017.03.10
  **/
 #include "ChatSession.h"
 #include <string.h>
@@ -18,13 +17,13 @@
 #include "../zlib1.2.11/ZlibUtil.h"
 #include "BussinessLogic.h"
 
-//包最大字节数限制为10M
+//The maximum size of the packet is limited to 10M 
 #define MAX_PACKAGE_SIZE    10 * 1024 * 1024
 
 using namespace std;
 using namespace net;
 
-//允许的最大时数据包来往间隔，这里设置成30秒
+//The interval between data packets is set to 30 seconds.
 #define MAX_NO_PACKAGE_INTERVAL  30
 
 ChatSession::ChatSession(const std::shared_ptr<TcpConnection>& conn, int sessionid) :
@@ -37,7 +36,6 @@ m_isLogin(false)
     m_lastPackageTime = time(NULL);
     conn->setMessageCallback(std::bind(&ChatSession::onRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 //#ifndef _DEBUG
-    //暂且注释掉，不利于调试
     //EnableHearbeatCheck();
 //#endif
 }
@@ -56,30 +54,28 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
 {
     while (true)
     {
-        //不够一个包头大小
+        //not enough for a packet header
         if (pBuffer->readableBytes() < (size_t)sizeof(chat_msg_header))
         {
             //LOGI << "buffer is not enough for a package header, pBuffer->readableBytes()=" << pBuffer->readableBytes() << ", sizeof(msg)=" << sizeof(msg);
             return;
         }
 
-        //取包头信息
+        //get packet header
         chat_msg_header header;
         memcpy(&header, pBuffer->peek(), sizeof(chat_msg_header));
-        //数据包压缩过
         if (header.compressflag == PACKAGE_COMPRESSED)
         {
-            //包头有错误，立即关闭连接
+            //There is an error in the packet header, close the connection immediately
             if (header.compresssize <= 0 || header.compresssize > MAX_PACKAGE_SIZE ||
                 header.originsize <= 0 || header.originsize > MAX_PACKAGE_SIZE)
             {
-                //客户端发非法数据包，服务器主动关闭之
                 LOGE("Illegal package, compresssize: %lld, originsize: %lld, close TcpConnection, client: %s",  header.compresssize, header.originsize, conn->peerAddress().toIpPort().c_str());
                 conn->forceClose();
                 return;
             }
 
-            //收到的数据不够一个完整的包
+            //The data received is not enough for a complete packet
             if (pBuffer->readableBytes() < (size_t)header.compresssize + sizeof(chat_msg_header))
                 return;
 

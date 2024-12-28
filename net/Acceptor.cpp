@@ -9,52 +9,52 @@
 using namespace net;
 
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
-    : loop_(loop),
-    acceptSocket_(sockets::createNonblockingOrDie()),
-    acceptChannel_(loop, acceptSocket_.fd()),
-    listenning_(false)   
+    : m_pLoop(loop),
+    m_objAcceptSocket(sockets::createNonblockingOrDie()),
+    m_objAcceptChannel(loop, m_objAcceptSocket.fd()),
+    m_bListenning(false)   
 {
 #ifndef WIN32
-    idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
+    m_nIdleFd = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
 #endif
 
-    acceptSocket_.setReuseAddr(true);
-    acceptSocket_.setReusePort(reuseport);
-    acceptSocket_.bindAddress(listenAddr);
-    acceptChannel_.setReadCallback(std::bind(&Acceptor::handleRead, this));
+    m_objAcceptSocket.setReuseAddr(true);
+    m_objAcceptSocket.setReusePort(reuseport);
+    m_objAcceptSocket.bindAddress(listenAddr);
+    m_objAcceptChannel.setReadCallback(std::bind(&Acceptor::handleRead, this));
 }
 
 Acceptor::~Acceptor()
 {
-    acceptChannel_.disableAll();
-    acceptChannel_.remove();
+    m_objAcceptChannel.disableAll();
+    m_objAcceptChannel.remove();
 #ifndef WIN32
-    ::close(idleFd_);
+    ::close(m_nIdleFd);
 #endif
 }
 
 void Acceptor::listen()
 {
-    loop_->assertInLoopThread();
-    listenning_ = true;
-    acceptSocket_.listen();
-    acceptChannel_.enableReading();
+    m_pLoop->assertInLoopThread();
+    m_bListenning = true;
+    m_objAcceptSocket.listen();
+    m_objAcceptChannel.enableReading();
 }
 
 void Acceptor::handleRead()
 {
-    loop_->assertInLoopThread();
+    m_pLoop->assertInLoopThread();
     InetAddress peerAddr;
     //FIXME loop until no more
-    int connfd = acceptSocket_.accept(&peerAddr);
+    int connfd = m_objAcceptSocket.accept(&peerAddr);
     if (connfd >= 0)
     {
          string hostport = peerAddr.toIpPort();
          LOGD("Accepts of %s", hostport.c_str());
         //newConnectionCallback_实际指向TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
-        if (newConnectionCallback_)
+        if (m_pNewConnectionCallback)
         {
-            newConnectionCallback_(connfd, peerAddr);
+            m_pNewConnectionCallback(connfd, peerAddr);
         }
         else
         {
@@ -100,10 +100,10 @@ void Acceptor::handleRead()
         */
         if (errno == EMFILE)
         {
-            ::close(idleFd_);
-            idleFd_ = ::accept(acceptSocket_.fd(), NULL, NULL);
-            ::close(idleFd_);
-            idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
+            ::close(m_nIdleFd); 
+            m_nIdleFd = ::accept(m_objAcceptSocket.fd(), NULL, NULL);
+            ::close(m_nIdleFd); 
+            m_nIdleFd = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
         }
 #endif
     }

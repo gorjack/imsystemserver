@@ -1,6 +1,6 @@
 /**
- * 即时通讯的业务逻辑都统一放在这里，BusinessLogic.cpp
- * zhangyl 2018.05.16
+ * BusinessLogic.cpp
+ * GJ 2024.11.30
  */
 
 #include "BussinessLogic.h"

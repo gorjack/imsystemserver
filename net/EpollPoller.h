@@ -32,7 +32,7 @@ namespace net
         void assertInLoopThread() const;
 
 	private:
-		static const int kInitEventListSize = 16;
+		static const int scnInitEventListSize = 16;
 
 		void fillActiveChannels(int numEvents, ChannelList* activeChannels) const;
 		bool update(int operation, Channel* channel);		
@@ -40,13 +40,13 @@ namespace net
 	private:
 		typedef std::vector<struct epoll_event> EventList;
 
-		int                                     epollfd_;
-		EventList                               events_;
+		int                                     m_nEpollfd;
+		EventList                               m_vecEvents;
 
 		typedef std::map<int, Channel*>         ChannelMap;
 
-		ChannelMap                              channels_;
-		EventLoop*                              ownerLoop_;
+		ChannelMap                              m_mapFd2Channel;
+		EventLoop*                              m_pOwnerLoop;
 	};
 
 }
