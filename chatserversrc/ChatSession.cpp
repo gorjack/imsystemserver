@@ -101,19 +101,18 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
 
             m_lastPackageTime = time(NULL);
         }
-        //Êý¾Ý°üÎ´Ñ¹Ëõ
+        //¿¿¿¿¿
         else
         {
-            //°üÍ·ÓÐ´íÎó£¬Á¢¼´¹Ø±ÕÁ¬½Ó
+            //¿¿¿¿¿¿¿¿¿¿¿¿
             if (header.originsize <= 0 || header.originsize > MAX_PACKAGE_SIZE)
             {
-                //¿Í»§¶Ë·¢·Ç·¨Êý¾Ý°ü£¬·þÎñÆ÷Ö÷¶¯¹Ø±ÕÖ®
                 LOGE("Illegal package, compresssize: %lld, originsize: %lld, close TcpConnection, client: %s", header.compresssize, header.originsize, conn->peerAddress().toIpPort().c_str());
                 conn->forceClose();
                 return;
             }
 
-            //ÊÕµ½µÄÊý¾Ý²»¹»Ò»¸öÍêÕûµÄ°ü
+            //¿¿¿¿¿
             if (pBuffer->readableBytes() < (size_t)header.originsize + sizeof(chat_msg_header))
                 return;
 
@@ -123,7 +122,6 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
             pBuffer->retrieve(header.originsize);
             if (!process(conn, inbuf.c_str(), inbuf.length()))
             {
-                //¿Í»§¶Ë·¢·Ç·¨Êý¾Ý°ü£¬·þÎñÆ÷Ö÷¶¯¹Ø±ÕÖ®
                 LOGE("Process error, close TcpConnection, client: %s", conn->peerAddress().toIpPort().c_str());
                 conn->forceClose();
                 return;
@@ -161,7 +159,7 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
         return false;
     }
    
-    //ÐÄÌø°üÌ«Æµ·±£¬²»´òÓ¡
+    //¿¿¿¿¿¿¿¿
     if (cmd != msg_type_heartbeat)
         LOGI("Request from client: userid=%d, cmd=%d, seq=%d, data=%s, datalength=%d, buflength=%d", m_userinfo.userid, cmd, m_seq, data.c_str(), datalength, buflength);
     
