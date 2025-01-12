@@ -1,7 +1,3 @@
-/**
- *  聊天服务程序入口函数
- *  zhangyl 2017.03.09
- **/
 #include <iostream>
 #include <stdlib.h>
 
@@ -26,7 +22,7 @@
 using namespace net;
 
 #ifdef WIN32
-//初始化Windows socket库
+//鲁玫脢录禄炉Windows socket驴芒
 NetworkInitializer windowsNetworkInitializer;
 #endif
 
@@ -49,7 +45,7 @@ void prog_exit(int signo)
 int main(int argc, char* argv[])
 {
 #ifndef WIN32
-    //设置信号处理
+    //脡猫脰脙脨脜潞脜麓娄脌铆
     signal(SIGCHLD, SIG_DFL);
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, prog_exit);
@@ -98,7 +94,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    //如果log目录不存在则创建之
+    //脠莽鹿没log脛驴脗录虏禄麓忙脭脷脭貌麓麓陆篓脰庐
     DIR* dp = opendir(logfilepath);
     if (dp == NULL)
     {
@@ -139,7 +135,7 @@ int main(int argc, char* argv[])
     CAsyncLog::init(logFileFullPath.c_str());
 //#endif
     
-    //初始化数据库配置
+    //鲁玫脢录禄炉脢媒戮脻驴芒脜盲脰脙
     const char* dbserver = config.getConfigName("dbserver");
     const char* dbuser = config.getConfigName("dbuser");
     const char* dbpassword = config.getConfigName("dbpassword");

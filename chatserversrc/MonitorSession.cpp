@@ -1,7 +1,3 @@
-/**
- * 监控会话类, MonitorSession.cpp
- * zhangyl 2017.03.09
- */
 #include "MonitorSession.h"
 #include <sstream>
 #include <string.h>
@@ -101,7 +97,7 @@ bool MonitorSession::showOnlineUserList(const std::string& token/* = ""*/)
                 << ",userid:" << iter->getUserId()
                 << ",username:" << iter->getUsername();
 
-            //如果输入了token，则显示用户密码，否则不显示
+            //脠莽鹿没脢盲脠毛脕脣token拢卢脭貌脧脭脢戮脫脙禄搂脙脺脗毛拢卢路帽脭貌虏禄脧脭脢戮
             if (monitorServer.isMonitorTokenValid(token.c_str()))
             {
                 os << ",password:" << iter->getPassword();
@@ -194,7 +190,7 @@ bool MonitorSession::process(const std::shared_ptr<TcpConnection>& conn, const s
         }
         else if (v[0] == g_helpInfo[3].cmd)
         {
-            //开启日志数据包打印二进制字节
+            //驴陋脝么脠脮脰戮脢媒戮脻掳眉麓貌脫隆露镁陆酶脰脝脳脰陆脷
             Singleton<ChatServer>::Instance().enableLogPackageBinary(true);
 
             char tip[32] = { "OK.\n" };
@@ -202,7 +198,7 @@ bool MonitorSession::process(const std::shared_ptr<TcpConnection>& conn, const s
         }
         else if (v[0] == g_helpInfo[4].cmd)
         {
-            //开启日志数据包打印二进制字节
+            //驴陋脝么脠脮脰戮脢媒戮脻掳眉麓貌脫隆露镁陆酶脰脝脳脰陆脷
             Singleton<ChatServer>::Instance().enableLogPackageBinary(false);
 
             char tip[32] = { "OK.\n" };

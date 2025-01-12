@@ -1,7 +1,3 @@
-/**
- * ¼à¿Ø»á»°Àà, MonitorSession.h
- * zhangyl 2017.03.09
- */
 #ifndef __MONITOR_SESSION_H__
 #define __MONITOR_SESSION_H__
 

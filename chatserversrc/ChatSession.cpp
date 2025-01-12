@@ -23,7 +23,7 @@
 using namespace std;
 using namespace net;
 
-//The interval between data packets is set to 30 seconds.
+//The interval between data packets is set to 30 seconds. æµ‹è¯•
 #define MAX_NO_PACKAGE_INTERVAL  30
 
 ChatSession::ChatSession(const std::shared_ptr<TcpConnection>& conn, int sessionid) :
@@ -93,7 +93,6 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
 
             if (!process(conn, destbuf.c_str(), destbuf.length()))
             {
-                //¿Í»§¶Ë·¢·Ç·¨Êı¾İ°ü£¬·şÎñÆ÷Ö÷¶¯¹Ø±ÕÖ®
                 LOGE("Process error, close TcpConnection, client: %s", conn->peerAddress().toIpPort().c_str());
                 conn->forceClose();
                 return;
@@ -101,10 +100,8 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
 
             m_lastPackageTime = time(NULL);
         }
-        //¿¿¿¿¿
         else
         {
-            //¿¿¿¿¿¿¿¿¿¿¿¿
             if (header.originsize <= 0 || header.originsize > MAX_PACKAGE_SIZE)
             {
                 LOGE("Illegal package, compresssize: %lld, originsize: %lld, close TcpConnection, client: %s", header.compresssize, header.originsize, conn->peerAddress().toIpPort().c_str());
@@ -112,7 +109,6 @@ void ChatSession::onRead(const std::shared_ptr<TcpConnection>& conn, Buffer* pBu
                 return;
             }
 
-            //¿¿¿¿¿
             if (pBuffer->readableBytes() < (size_t)header.originsize + sizeof(chat_msg_header))
                 return;
 
@@ -159,7 +155,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
         return false;
     }
    
-    //¿¿¿¿¿¿¿¿
     if (cmd != msg_type_heartbeat)
         LOGI("Request from client: userid=%d, cmd=%d, seq=%d, data=%s, datalength=%d, buflength=%d", m_userinfo.userid, cmd, m_seq, data.c_str(), datalength, buflength);
     
@@ -171,69 +166,56 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
         
     switch (cmd)
     {
-        //ĞÄÌø°ü
         case msg_type_heartbeat:
             onHeartbeatResponse(conn);
             break;
 
-        //×¢²á
         case msg_type_register:
             onRegisterResponse(data, conn);
             break;
         
-        //µÇÂ¼
         case msg_type_login:                          
             onLoginResponse(data, conn);
             break;
         
-        //ÆäËûÃüÁî±ØĞëÔÚÒÑ¾­µÇÂ¼µÄÇ°ÌáÏÂ²ÅÄÜ½øĞĞ²Ù×÷
         default:
         {
             if (m_isLogin)
             {
                 switch (cmd)
                 {
-                    //»ñÈ¡ºÃÓÑÁĞ±í
                     case msg_type_getofriendlist:
                         onGetFriendListResponse(conn);
                         break;
 
-                    //²éÕÒÓÃ»§
                     case msg_type_finduser:
                         onFindUserResponse(data, conn);
                         break;
 
-                    //¼ÓºÃÓÑ
                     case msg_type_operatefriend:    
                         onOperateFriendResponse(data, conn);
                         break;
 
-                    //ÓÃ»§Ö÷¶¯¸ü¸Ä×Ô¼ºÔÚÏß×´Ì¬
                     case msg_type_userstatuschange:
         	            onChangeUserStatusResponse(data, conn);
                         break;
 
-                    //¸üĞÂÓÃ»§ĞÅÏ¢
                     case msg_type_updateuserinfo:
                         onUpdateUserInfoResponse(data, conn);
                         break;
         
-                    //ĞŞ¸ÄÃÜÂë
                     case msg_type_modifypassword:
                         onModifyPasswordResponse(data, conn);
                         break;
         
-                    //´´½¨Èº
                     case msg_type_creategroup:
                         onCreateGroupResponse(data, conn);
                         break;
 
-                    //»ñÈ¡Ö¸¶¨Èº³ÉÔ±ĞÅÏ¢
                     case msg_type_getgroupmembers:
                         onGetGroupMembersResponse(data, conn);
                         break;
 
-                    //ÁÄÌìÏûÏ¢
                     case msg_type_chat:
                     {
                         int32_t target;
@@ -246,7 +228,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
                     }
                         break;
         
-                    //Èº·¢ÏûÏ¢
                     case msg_type_multichat:
                     {
                         std::string targets;
@@ -262,7 +243,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
 
                         break;
 
-                    //ÆÁÄ»½ØÍ¼
                     case msg_type_remotedesktop:
                     {
                         string bmpHeader;
@@ -291,7 +271,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
                     }
                         break;
 
-                    //¸üĞÂÓÃ»§ºÃÓÑĞÅÏ¢
                     case msg_type_updateteaminfo:
                     {
                         int32_t operationType;
@@ -321,7 +300,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
                         break;
                     }
                         
-                    //ĞŞ¸ÄºÃÓÑ±¸×¢ĞÅÏ¢
                     case msg_type_modifyfriendmarkname:
                     {
                         int32_t friendid;
@@ -343,7 +321,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
                         break;
                     }
                     
-                    //ÒÆ¶¯ºÃÓÑÖÁÆäËû·Ö×é
                     case msg_type_movefriendtootherteam:
                     {
                         int32_t friendid;
@@ -382,7 +359,6 @@ bool ChatSession::process(const std::shared_ptr<TcpConnection>& conn, const char
             }
             else
             {
-                //ÓÃ»§Î´µÇÂ¼£¬¸æËß¿Í»§¶Ë²»ÄÜ½øĞĞ²Ù×÷ÌáÊ¾¡°Î´µÇÂ¼¡±
                 std::string data = "{\"code\": 2, \"msg\": \"not login, please login first!\"}";
                 send(cmd, m_seq, data);
                 LOGI("Response to client: cmd=%d, , data=%s, , sessionId=%d", cmd, data.c_str(), m_id);                
@@ -400,7 +376,6 @@ void ChatSession::onHeartbeatResponse(const std::shared_ptr<TcpConnection>& conn
     std::string dummydata;    
     send(msg_type_heartbeat, m_seq, dummydata);
 
-    //ĞÄÌø°üÈÕÖ¾¾Í²»Òª´òÓ¡ÁË£¬ºÜÈİÒ×Ğ´ÂúÈÕÖ¾
     //LOGI << "Response to client: cmd=1000" << ", sessionId=" << m_id;
 }
 
@@ -449,7 +424,6 @@ void ChatSession::onLoginResponse(const std::string& data, const std::shared_ptr
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     if (cachedUser.userid == 0)
     {
-        //TODO: ÕâĞ©Ó²±àÂëµÄ×Ö·ûÓ¦¸ÃÍ³Ò»·Åµ½Ä³¸öµØ·½Í³Ò»¹ÜÀí
         os << "{\"code\": 102, \"msg\": \"not registered\"}";
     }
     else
@@ -458,24 +432,21 @@ void ChatSession::onLoginResponse(const std::string& data, const std::shared_ptr
             os << "{\"code\": 103, \"msg\": \"incorrect password\"}";
         else
         {
-            //Èç¹û¸ÃÕËºÅÒÑ¾­µÇÂ¼£¬Ôò½«Ç°Ò»¸öÕËºÅÌßÏÂÏß
             std::shared_ptr<ChatSession> targetSession;
-            //ÓÉÓÚ·şÎñÆ÷¶ËÖ§³Ö¶àÀàĞÍÖÕ¶ËµÇÂ¼£¬ËùÒÔÖ»ÓĞÍ¬Ò»ÀàĞÍµÄÖÕ¶ËÇÒÍ¬Ò»¿Í»§¶ËÀàĞÍ²ÅÈÏÎªÊÇÍ¬Ò»¸ösession
+            
             imserver.getSessionByUserIdAndClientType(targetSession, cachedUser.userid, clientType);
             if (targetSession)
             {                              
                 string dummydata;
                 targetSession->send(msg_type_kickuser, m_seq, dummydata);
-                //±»ÌßÏÂÏßµÄSession±ê¼ÇÎªÎŞĞ§µÄ
+                //Â¿Â¿Â¿Â¿sessionÂ¿Â¿Â¿Â¿
                 targetSession->makeSessionInvalid();
 
                 LOGI("Response to client, userid: %d, cmd=msg_type_kickuser", targetSession->getUserId());
 
-                //¹Ø±ÕÁ¬½Ó
                 //targetSession->GetConnectionPtr()->forceClose();
             }           
             
-            //¼ÇÂ¼ÓÃ»§ĞÅÏ¢
             m_userinfo.userid = cachedUser.userid;
             m_userinfo.username = username;
             m_userinfo.nickname = cachedUser.nickname;
@@ -490,15 +461,13 @@ void ChatSession::onLoginResponse(const std::string& data, const std::shared_ptr
         }
     }
    
-    //µÇÂ¼ĞÅÏ¢Ó¦´ğ
     send(msg_type_login, m_seq, os.str());
 
     LOGI("Response to client: cmd=msg_type_login, data=%s, userid=", os.str().c_str(), m_userinfo.userid);
 
-    //ÉèÖÃÒÑ¾­µÇÂ¼µÄ±êÖ¾
     m_isLogin = true;
 
-    //ÍÆËÍÀëÏßÍ¨ÖªÏûÏ¢
+    //Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿:
     std::list<NotifyMsgCache> listNotifyCache;
     Singleton<MsgCacheManager>::Instance().getNotifyMsgCache(m_userinfo.userid, listNotifyCache);
     for (const auto &iter : listNotifyCache)
@@ -506,7 +475,7 @@ void ChatSession::onLoginResponse(const std::string& data, const std::shared_ptr
         send(iter.notifymsg);
     }
 
-    //ÍÆËÍÀëÏßÁÄÌìÏûÏ¢
+    //Â¿Â¿Â¿Â¿Â¿Â¿
     std::list<ChatMsgCache> listChatCache;
     Singleton<MsgCacheManager>::Instance().getChatMsgCache(m_userinfo.userid, listChatCache);
     for (const auto &iter : listChatCache)
@@ -514,12 +483,12 @@ void ChatSession::onLoginResponse(const std::string& data, const std::shared_ptr
         send(iter.chatmsg);
     }
 
-    //¸øÆäËûÓÃ»§ÍÆËÍÉÏÏßÏûÏ¢
+    //Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿
     std::list<User> friends;
     Singleton<UserManager>::Instance().getFriendInfoByUserId(m_userinfo.userid, friends);
     for (const auto& iter : friends)
     {
-        //ÒòÎª´æÔÚÒ»¸öÓÃ»§id£¬¶à¸öÖÕ¶Ë£¬ËùÒÔ£¬Í¬Ò»¸öuserid¿ÉÄÜ¶ÔÓ¦¶à¸ösession
+        //Â¿Â¿Â¿Â¿ID Â¿Â¿SESSION Â¿Â¿Â¿Â¿Â¿Â¿
         std::list<std::shared_ptr<ChatSession>> sessions;
         imserver.getSessionsByUserId(sessions, iter.userid);
         for (auto& iter2 : sessions)
@@ -571,17 +540,16 @@ void ChatSession::onChangeUserStatusResponse(const std::string& data, const std:
     if (m_userinfo.status == newstatus)
         return;
 
-    //¸üĞÂÏÂµ±Ç°ÓÃ»§µÄ×´Ì¬
+    //Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿Â¿
     m_userinfo.status = newstatus;
 
-    //TODO: Ó¦´ğÏÂ×Ô¼º¸æËß¿Í»§¶ËĞŞ¸Ä³É¹¦
 
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     std::list<User> friends;
     Singleton<UserManager>::Instance().getFriendInfoByUserId(m_userinfo.userid, friends);
     for (const auto& iter : friends)
     {
-        //ÒòÎª´æÔÚÒ»¸öÓÃ»§id£¬¶à¸öÖÕ¶Ë£¬ËùÒÔ£¬Í¬Ò»¸öuserid¿ÉÄÜ¶ÔÓ¦¶à¸ösession
+        //Ã’Ã²ÃÂªÂ´Ã¦Ã”ÃšÃ’Â»Â¸Ã¶Ã“ÃƒÂ»Â§idÂ£Â¬Â¶Ã Â¸Ã¶Ã–Ã•Â¶Ã‹Â£Â¬Ã‹Ã¹Ã’Ã”Â£Â¬ÃÂ¬Ã’Â»Â¸Ã¶useridÂ¿Ã‰Ã„ÃœÂ¶Ã”Ã“Â¦Â¶Ã Â¸Ã¶session
         std::list<std::shared_ptr<ChatSession>> sessions;
         imserver.getSessionsByUserId(sessions, iter.userid);
         for (auto& iter2 : sessions)
@@ -615,14 +583,14 @@ void ChatSession::onFindUserResponse(const std::string& data, const std::shared_
     }
 
     string retData;
-    //TODO: Ä¿Ç°Ö»Ö§³Ö²éÕÒµ¥¸öÓÃ»§
+    //TODO: Ã„Â¿Ã‡Â°Ã–Â»Ã–Â§Â³Ã–Â²Ã©Ã•Ã’ÂµÂ¥Â¸Ã¶Ã“ÃƒÂ»Â§
     string username = jsonRoot["username"].asString();
     User cachedUser;
     if (!Singleton<UserManager>::Instance().getUserInfoByUsername(username, cachedUser))
         retData = "{ \"code\": 0, \"msg\": \"ok\", \"userinfo\": [] }";
     else
     {
-        //TODO: ÓÃ»§±È½Ï¶àµÄÊ±ºò£¬Ó¦¸ÃÊ¹ÓÃ¶¯Ì¬string
+        //TODO: Ã“ÃƒÂ»Â§Â±ÃˆÂ½ÃÂ¶Ã ÂµÃ„ÃŠÂ±ÂºÃ²Â£Â¬Ã“Â¦Â¸ÃƒÃŠÂ¹Ã“ÃƒÂ¶Â¯ÃŒÂ¬string
         char szUserInfo[256] = { 0 };
         snprintf(szUserInfo, 256, "{ \"code\": 0, \"msg\": \"ok\", \"userinfo\": [{\"userid\": %d, \"username\": \"%s\", \"nickname\": \"%s\", \"facetype\":%d}] }", cachedUser.userid, cachedUser.username.c_str(), cachedUser.nickname.c_str(), cachedUser.facetype);
         retData = szUserInfo;
@@ -660,7 +628,7 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
     {
         if (type == 4)
         {
-            //ÍËÈº
+            //ÃÃ‹ÃˆÂº
             deleteFriend(conn, targetUserid);
             return;
         }
@@ -668,36 +636,36 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
         if (Singleton<UserManager>::Instance().isFriend(m_userinfo.userid, targetUserid))
         {            
             LOGE("In group already, unable to join in group, groupid: %d, , userid: %d, , client: %s",  targetUserid, m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
-            //TODO: Í¨ÖªÏÂ¿Í»§¶Ë
+            //TODO: ÃÂ¨Ã–ÂªÃÃ‚Â¿ÃÂ»Â§Â¶Ã‹
             return;
         }
 
-        //¼ÓÈºÖ±½ÓÍ¬Òâ
+        //Â¼Ã“ÃˆÂºÃ–Â±Â½Ã“ÃÂ¬Ã’Ã¢
         onAddGroupResponse(targetUserid, conn);
         return;
     }
 
     char szData[256] = { 0 };
-    //É¾³ıºÃÓÑ
+    //Ã‰Â¾Â³Ã½ÂºÃƒÃ“Ã‘
     if (type == 4)
     {
         deleteFriend(conn, targetUserid);
         return;
     }
-    //·¢³ö¼ÓºÃÓÑÉêÇë
+    //Â·Â¢Â³Ã¶Â¼Ã“ÂºÃƒÃ“Ã‘Ã‰ÃªÃ‡Ã«
     if (type == 1)
     {
         if (Singleton<UserManager>::Instance().isFriend(m_userinfo.userid, targetUserid))
         {
             LOGE("Friendship already, unable to add friend, friendid: %d, userid: %d, client: %s", targetUserid, m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
-            //TODO: Í¨ÖªÏÂ¿Í»§¶Ë
+            //TODO: ÃÂ¨Ã–ÂªÃÃ‚Â¿ÃÂ»Â§Â¶Ã‹
             return;
         }
         
         //{"userid": 9, "type": 1, }        
         snprintf(szData, 256, "{\"userid\":%d, \"type\":2, \"username\": \"%s\"}", m_userinfo.userid, m_userinfo.username.c_str());
     }
-    //Ó¦´ğ¼ÓºÃÓÑ
+    //Ã“Â¦Â´Ã°Â¼Ã“ÂºÃƒÃ“Ã‘
     else if (type == 3)
     {
         if (!jsonRoot["accept"].isInt())
@@ -707,7 +675,7 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
         }
 
         int accept = jsonRoot["accept"].asInt();
-        //½ÓÊÜ¼ÓºÃÓÑÉêÇëºó£¬½¨Á¢ºÃÓÑ¹ØÏµ
+        //Â½Ã“ÃŠÃœÂ¼Ã“ÂºÃƒÃ“Ã‘Ã‰ÃªÃ‡Ã«ÂºÃ³Â£Â¬Â½Â¨ÃÂ¢ÂºÃƒÃ“Ã‘Â¹Ã˜ÃÂµ
         if (accept == 1)
         {
             if (!Singleton<UserManager>::Instance().makeFriendRelationshipInDB(targetUserid, m_userinfo.userid))
@@ -726,7 +694,7 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
         //{ "userid": 9, "type" : 3, "userid" : 9, "username" : "xxx", "accept" : 1 }
         snprintf(szData, 256, "{\"userid\": %d, \"type\": 3, \"username\": \"%s\", \"accept\": %d}", m_userinfo.userid, m_userinfo.username.c_str(), accept);
 
-        //ÌáÊ¾×Ô¼ºµ±Ç°ÓÃ»§¼ÓºÃÓÑ³É¹¦
+        //ÃŒÃ¡ÃŠÂ¾Ã—Ã”Â¼ÂºÂµÂ±Ã‡Â°Ã“ÃƒÂ»Â§Â¼Ã“ÂºÃƒÃ“Ã‘Â³Ã‰Â¹Â¦
         User targetUser;
         if (!Singleton<UserManager>::Instance().getUserInfoByUserId(targetUserid, targetUser))
         {
@@ -739,7 +707,7 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
         LOGI("Response to client: userid: %d, cmd=msg_type_addfriend, data: %s", m_userinfo.userid, szSelfData);
     }
 
-    //ÌáÊ¾¶Ô·½¼ÓºÃÓÑ³É¹¦
+    //ÃŒÃ¡ÃŠÂ¾Â¶Ã”Â·Â½Â¼Ã“ÂºÃƒÃ“Ã‘Â³Ã‰Â¹Â¦
     std::string outbuf;
     BinaryStreamWriter writeStream(&outbuf);
     writeStream.WriteInt32(msg_type_operatefriend);
@@ -747,10 +715,10 @@ void ChatSession::onOperateFriendResponse(const std::string& data, const std::sh
     writeStream.WriteCString(szData, strlen(szData));
     writeStream.Flush();
 
-    //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+    //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
     std::list<std::shared_ptr<ChatSession>> sessions;
     Singleton<ChatServer>::Instance().getSessionsByUserId(sessions, targetUserid);
-    //Ä¿±êÓÃ»§²»ÔÚÏß£¬»º´æÕâ¸öÏûÏ¢
+    //Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§Â²Â»Ã”ÃšÃÃŸÂ£Â¬Â»ÂºÂ´Ã¦Ã•Ã¢Â¸Ã¶ÃÃ»ÃÂ¢
     if (sessions.empty())
     {
         Singleton<MsgCacheManager>::Instance().addNotifyMsgCache(targetUserid, outbuf);
@@ -791,13 +759,13 @@ void ChatSession::onAddGroupResponse(int32_t groupId, const std::shared_ptr<TcpC
         return;
     }
 
-    //¸øÆäËûÔÚÏßÈº³ÉÔ±ÍÆËÍÈºĞÅÏ¢·¢Éú±ä»¯µÄÏûÏ¢
+    //Â¸Ã¸Ã†Ã¤Ã‹Ã»Ã”ÃšÃÃŸÃˆÂºÂ³Ã‰Ã”Â±ÃÃ†Ã‹ÃÃˆÂºÃÃ…ÃÂ¢Â·Â¢Ã‰ÃºÂ±Ã¤Â»Â¯ÂµÃ„ÃÃ»ÃÂ¢
     std::list<User> friends;
     Singleton<UserManager>::Instance().getFriendInfoByUserId(groupId, friends);
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     for (const auto& iter : friends)
     {
-        //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+        //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
         std::list< std::shared_ptr<ChatSession>> targetSessions;
         imserver.getSessionsByUserId(targetSessions, iter.userid);
         for (auto& iter2 : targetSessions)
@@ -868,18 +836,18 @@ void ChatSession::onUpdateUserInfoResponse(const std::string& data, const std::s
         retdata << "{\"code\": 0, \"msg\": \"ok\"," << currentuserinfo.str()  << "\"}";
     }
 
-    //Ó¦´ğ¿Í»§¶Ë
+    //Ã“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹
     send(msg_type_updateuserinfo, m_seq, retdata.str());
 
     LOGI("Response to client: userid: %d, cmd=msg_type_updateuserinfo, data: %s", m_userinfo.userid, retdata.str().c_str());
 
-    //¸øÆäËûÔÚÏßºÃÓÑÍÆËÍ¸öÈËĞÅÏ¢·¢Éú¸Ä±äÏûÏ¢
+    //Â¸Ã¸Ã†Ã¤Ã‹Ã»Ã”ÃšÃÃŸÂºÃƒÃ“Ã‘ÃÃ†Ã‹ÃÂ¸Ã¶ÃˆÃ‹ÃÃ…ÃÂ¢Â·Â¢Ã‰ÃºÂ¸Ã„Â±Ã¤ÃÃ»ÃÂ¢
     std::list<User> friends;
     Singleton<UserManager>::Instance().getFriendInfoByUserId(m_userinfo.userid, friends);
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     for (const auto& iter : friends)
     {
-        //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+        //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
         std::list<std::shared_ptr<ChatSession>> targetSessions;
         imserver.getSessionsByUserId(targetSessions, iter.userid);
         for (auto& iter2 : targetSessions)
@@ -937,7 +905,7 @@ void ChatSession::onModifyPasswordResponse(const std::string& data, const std::s
             retdata = "{\"code\": 0, \"msg\": \"ok\"}";
     }
 
-    //Ó¦´ğ¿Í»§¶Ë
+    //Ã“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹
     send(msg_type_modifypassword, m_seq, retdata);
 
     LOGI("Response to client: userid: %d, cmd=msg_type_modifypassword, data: %s", m_userinfo.userid, data.c_str());
@@ -970,24 +938,24 @@ void ChatSession::onCreateGroupResponse(const std::string& data, const std::shar
     if (!Singleton<UserManager>::Instance().addGroup(groupname.c_str(), m_userinfo.userid, groupid))
     {
         LOGE("Add group error, data: %s, userid: %d, client: %s", data.c_str(), m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
-        retdata << "{ \"code\": 106, \"msg\" : \"create group error\"}";
+        retdata << "{ \"code\": 106, \"msg\" <F8>: \"create group error\"}";
     }
     else
     {
         retdata << "{\"code\": 0, \"msg\": \"ok\", \"groupid\":" << groupid << ", \"groupname\": \"" << groupname << "\"}";
     }
 
-    //TODO: Èç¹û²½Öè1³É¹¦ÁË£¬²½Öè2Ê§°ÜÁËÔõÃ´°ì£¿
-    //²½Öè1
-    //´´½¨³É¹¦ÒÔºó¸ÃÓÃ»§×Ô¶¯¼ÓÈº
+    //TODO: ÃˆÃ§Â¹Ã»Â²Â½Ã–Ã¨1Â³Ã‰Â¹Â¦ÃÃ‹Â£Â¬Â²Â½Ã–Ã¨2ÃŠÂ§Â°ÃœÃÃ‹Ã”ÃµÃƒÂ´Â°Ã¬Â£Â¿
+    //Â²Â½Ã–Ã¨1
+    //Â´Â´Â½Â¨Â³Ã‰Â¹Â¦Ã’Ã”ÂºÃ³Â¸ÃƒÃ“ÃƒÂ»Â§Ã—Ã”Â¶Â¯Â¼Ã“ÃˆÂº
     if (!Singleton<UserManager>::Instance().makeFriendRelationshipInDB(m_userinfo.userid, groupid))
     {
         LOGE("join in group, errordata: %s, userid: %d, client: %s", data.c_str(), m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
         return;
     }
 
-    //¸üĞÂÄÚ´æÖĞµÄºÃÓÑ¹ØÏµ
-    //²½Öè2
+    //Â¸Ã¼ÃÃ‚Ã„ÃšÂ´Ã¦Ã–ÃÂµÃ„ÂºÃƒÃ“Ã‘Â¹Ã˜ÃÂµ
+    //Â²Â½Ã–Ã¨2
     if (!Singleton<UserManager>::Instance().updateUserRelationshipInMemory(m_userinfo.userid, groupid, FRIEND_OPERATION_ADD))
     {
         LOGE("UpdateUserTeamInfo error, data: %s, userid: %d, client: %s", data.c_str(), m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
@@ -1001,12 +969,12 @@ void ChatSession::onCreateGroupResponse(const std::string& data, const std::shar
     //}
 
 
-    //Ó¦´ğ¿Í»§¶Ë£¬½¨Èº³É¹¦
+    //Ã“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹Â£Â¬Â½Â¨ÃˆÂºÂ³Ã‰Â¹Â¦
     send(msg_type_creategroup, m_seq, retdata.str());
 
     LOGI("Response to client: userid: %d, cmd=msg_type_creategroup, data: %s", m_userinfo.userid, retdata.str().c_str());
 
-    //Ó¦´ğ¿Í»§¶Ë£¬³É¹¦¼ÓÈº
+    //Ã“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹Â£Â¬Â³Ã‰Â¹Â¦Â¼Ã“ÃˆÂº
     {
         char szSelfData[256] = { 0 };
         snprintf(szSelfData, 256, "{\"userid\": %d, \"type\": 3, \"username\": \"%s\", \"accept\": 1}", groupid, groupname.c_str());
@@ -1017,7 +985,7 @@ void ChatSession::onCreateGroupResponse(const std::string& data, const std::shar
 
 void ChatSession::onGetGroupMembersResponse(const std::string& data, const std::shared_ptr<TcpConnection>& conn)
 {
-    //{"groupid": Èºid}
+    //{"groupid": ÃˆÂºid}
     Json::CharReaderBuilder b;
     Json::CharReader* reader(b.newCharReader());
     Json::Value jsonRoot;
@@ -1062,7 +1030,7 @@ void ChatSession::onGetGroupMembersResponse(const std::string& data, const std::
         strUserInfo += osSingleUserInfo.str();
         strUserInfo += ",";
     }
-    //È¥µô×îºó¶àÓàµÄ¶ººÅ
+    //ÃˆÂ¥ÂµÃ´Ã—Ã®ÂºÃ³Â¶Ã Ã“Ã ÂµÃ„Â¶ÂºÂºÃ…
     strUserInfo = strUserInfo.substr(0, strUserInfo.length() - 1);
     std::ostringstream os;
     os << "{\"code\": 0, \"msg\": \"ok\", \"groupid\": " << groupid << ", \"members\":[" << strUserInfo << "]}";
@@ -1074,7 +1042,7 @@ void ChatSession::onGetGroupMembersResponse(const std::string& data, const std::
 void ChatSession::sendUserStatusChangeMsg(int32_t userid, int type, int status/* = 0*/)
 {
     string data; 
-    //ÓÃ»§ÉÏÏß
+    //Ã“ÃƒÂ»Â§Ã‰ÃÃÃŸ
     if (type == 1)
     {
         int32_t clientType = Singleton<ChatServer>::Instance().getUserClientTypeByUserId(userid);
@@ -1083,12 +1051,12 @@ void ChatSession::sendUserStatusChangeMsg(int32_t userid, int type, int status/*
         sprintf(szData, "{ \"type\": 1, \"onlinestatus\": %d, \"clienttype\": %d}", status, clientType);
         data = szData;
     }
-    //ÓÃ»§ÏÂÏß
+    //Ã“ÃƒÂ»Â§ÃÃ‚ÃÃŸ
     else if (type == 2)
     {
         data = "{\"type\": 2, \"onlinestatus\": 0}";
     }
-    //¸öÈËêÇ³Æ¡¢Í·Ïñ¡¢Ç©ÃûµÈĞÅÏ¢¸ü¸Ä
+    //Â¸Ã¶ÃˆÃ‹ÃªÃ‡Â³Ã†Â¡Â¢ÃÂ·ÃÃ±Â¡Â¢Ã‡Â©ÃƒÃ»ÂµÃˆÃÃ…ÃÂ¢Â¸Ã¼Â¸Ã„
     else if (type == 3)
     {
         data = "{\"type\": 3}";
@@ -1131,14 +1099,14 @@ void ChatSession::onChatResponse(int32_t targetid, const std::string& data, cons
     writeStream.WriteInt32(msg_type_chat);
     writeStream.WriteInt32(m_seq);
     writeStream.WriteString(modifiedChatData);
-    //ÏûÏ¢·¢ËÍÕß
+    //ÃÃ»ÃÂ¢Â·Â¢Ã‹ÃÃ•ÃŸ
     writeStream.WriteInt32(m_userinfo.userid);
-    //ÏûÏ¢½ÓÊÜÕß
+    //ÃÃ»ÃÂ¢Â½Ã“ÃŠÃœÃ•ÃŸ
     writeStream.WriteInt32(targetid);
     writeStream.Flush();
 
     UserManager& userMgr = Singleton<UserManager>::Instance();
-    //Ğ´ÈëÏûÏ¢¼ÇÂ¼
+    //ÃÂ´ÃˆÃ«ÃÃ»ÃÂ¢Â¼Ã‡Ã‚Â¼
     if (!userMgr.saveChatMsgToDb(m_userinfo.userid, targetid, data))
     {
         LOGE("Write chat msg to db error, senderid: %d, targetid: %d, chatmsg: %s, client: %s", m_userinfo.userid, targetid, data.c_str(), conn->peerAddress().toIpPort().c_str());
@@ -1146,13 +1114,13 @@ void ChatSession::onChatResponse(int32_t targetid, const std::string& data, cons
 
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     MsgCacheManager& msgCacheMgr = Singleton<MsgCacheManager>::Instance();
-    //µ¥ÁÄÏûÏ¢
+    //ÂµÂ¥ÃÃ„ÃÃ»ÃÂ¢
     if (targetid < GROUPID_BOUBDARY)
     {
-        //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+        //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
         std::list<std::shared_ptr<ChatSession>> targetSessions;
         imserver.getSessionsByUserId(targetSessions, targetid);
-        //Ä¿±êÓÃ»§²»ÔÚÏß£¬»º´æÕâ¸öÏûÏ¢
+        //Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§Â²Â»Ã”ÃšÃÃŸÂ£Â¬Â»ÂºÂ´Ã¦Ã•Ã¢Â¸Ã¶ÃÃ»ÃÂ¢
         if (targetSessions.empty())
         {
             msgCacheMgr.addChatMsgCache(targetid, outbuf);
@@ -1166,7 +1134,7 @@ void ChatSession::onChatResponse(int32_t targetid, const std::string& data, cons
             }
         }
     }
-    //ÈºÁÄÏûÏ¢
+    //ÃˆÂºÃÃ„ÃÃ»ÃÂ¢
     else
     {       
         std::list<User> friends;
@@ -1175,14 +1143,14 @@ void ChatSession::onChatResponse(int32_t targetid, const std::string& data, cons
         bool useronline = false;
         for (const auto& iter : friends)
         {
-            //ÅÅ³ıÈº³ÉÔ±ÖĞµÄ×Ô¼º
+            //Ã…Ã…Â³Ã½ÃˆÂºÂ³Ã‰Ã”Â±Ã–ÃÂµÃ„Ã—Ã”Â¼Âº
             if (iter.userid == m_userinfo.userid)
                 continue;
 
-            //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+            //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
             std::list<std::shared_ptr<ChatSession>> targetSessions;
             imserver.getSessionsByUserId(targetSessions, iter.userid);
-            //Ä¿±êÓÃ»§²»ÔÚÏß£¬»º´æÕâ¸öÏûÏ¢
+            //Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§Â²Â»Ã”ÃšÃÃŸÂ£Â¬Â»ÂºÂ´Ã¦Ã•Ã¢Â¸Ã¶ÃÃ»ÃÂ¢
             if (targetSessions.empty())
             {
                 msgCacheMgr.addChatMsgCache(iter.userid, outbuf);
@@ -1239,18 +1207,18 @@ void ChatSession::onScreenshotResponse(int32_t targetid, const std::string& bmpH
     writeStream.WriteString(dummy);
     writeStream.WriteString(bmpHeader);
     writeStream.WriteString(bmpData);
-    //ÏûÏ¢½ÓÊÜÕß
+    //ÃÃ»ÃÂ¢Â½Ã“ÃŠÃœÃ•ÃŸ
     writeStream.WriteInt32(targetid);
     writeStream.Flush();
 
     ChatServer& imserver = Singleton<ChatServer>::Instance();
-    //µ¥ÁÄÏûÏ¢
+    //ÂµÂ¥ÃÃ„ÃÃ»ÃÂ¢
     if (targetid >= GROUPID_BOUBDARY)
         return;
 
     std::list<std::shared_ptr<ChatSession>> targetSessions;
     imserver.getSessionsByUserId(targetSessions, targetid);
-    //ÏÈ¿´Ä¿±êÓÃ»§ÔÚÏß²Å×ª·¢
+    //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§Ã”ÃšÃÃŸÂ²Ã…Ã—ÂªÂ·Â¢
     if (!targetSessions.empty())
     {
         for (auto& iter : targetSessions)
@@ -1273,7 +1241,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
     if (!Singleton<UserManager>::Instance().getTeamInfoByUserId(m_userinfo.userid, teaminfo))
     {
         LOGE("GetTeamInfoByUserId failed, userid: %d, client: %s", m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
-        //TODO: Ó¦¸ÃÓ¦´ğÒ»ÏÂ¿Í»§¶Ë
+        //TODO: Ã“Â¦Â¸ÃƒÃ“Â¦Â´Ã°Ã’Â»ÃÃ‚Â¿ÃÂ»Â§Â¶Ã‹
         return;
     }
 
@@ -1291,7 +1259,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
     bool ok = reader->parse(teaminfo.c_str(), teaminfo.c_str() + teaminfo.length(), &jsonRoot, &errs);
     if (!ok || errs.size() != 0)
     {
-        //TODO: Ó¦¸ÃÓ¦´ğÒ»ÏÂ¿Í»§¶Ë
+        //TODO: Ã“Â¦Â¸ÃƒÃ“Â¦Â´Ã°Ã’Â»ÃÃ‚Â¿ÃÂ»Â§Â¶Ã‹
         LOGE("parse teaminfo json failed, userid: %d, client: %s", m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
         delete reader;
         return;
@@ -1300,7 +1268,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
 
     string newTeamInfo;
 
-    //ĞÂÔö·Ö×é
+    //ÃÃ‚Ã”Ã¶Â·Ã–Ã—Ã©
     if (operationType == updateteaminfo_operation_add)
     {
         uint32_t teamCount = jsonRoot.size();
@@ -1308,7 +1276,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
         {
             if (!jsonRoot[i]["teamname"].isNull() && jsonRoot[i]["teamname"].asString() == newTeamName)
             {
-                //TODO: ÌáÊ¾¿Í»§¶Ë·Ö×éÒÑ¾­´æÔÚ
+                //TODO: ÃŒÃ¡ÃŠÂ¾Â¿ÃÂ»Â§Â¶Ã‹Â·Ã–Ã—Ã©Ã’Ã‘Â¾Â­Â´Ã¦Ã”Ãš
                 LOGE("teamname not exist, userid: %d, client: %s", m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
                 return;
             }
@@ -1322,7 +1290,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
         //newTeamInfo = writer.write(JsonRoot);
 
         Json::StreamWriterBuilder streamWriterBuilder;
-        //Ïû³ıjsonÖĞµÄ\tºÍ\n·ûºÅ
+        //ÃÃ»Â³Ã½jsonÃ–ÃÂµÃ„\tÂºÃ\nÂ·Ã»ÂºÃ…
         streamWriterBuilder.settings_["indentation"] = "";
         newTeamInfo = Json::writeString(streamWriterBuilder, jsonRoot);      
     }
@@ -1330,8 +1298,8 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
     {
         if (oldTeamName == DEFAULT_TEAMNAME)
         {
-            //Ä¬ÈÏ·Ö×é²»ÔÊĞíÉ¾³ı
-            //TODO: ÌáÊ¾¿Í»§¶Ë
+            //Ã„Â¬ÃˆÃÂ·Ã–Ã—Ã©Â²Â»Ã”ÃŠÃÃ­Ã‰Â¾Â³Ã½
+            //TODO: ÃŒÃ¡ÃŠÂ¾Â¿ÃÂ»Â§Â¶Ã‹
             return;
         }
         
@@ -1342,10 +1310,10 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
             if (!jsonRoot[i]["teamname"].isNull() && jsonRoot[i]["teamname"].asString() == oldTeamName)
             {
                 found = true;
-                //TODO£º¿ÉÄÜÓĞÎÊÌâ
+                //TODOÂ£ÂºÂ¿Ã‰Ã„ÃœÃ“ÃÃÃŠÃŒÃ¢
                 jsonRoot.removeIndex(i, &jsonRoot[i]["teamname"]);
 
-                //½«Êı¾İ¿âÖĞ¸Ã×éµÄºÃÓÑÒÆ¶¯ÖÁÄ¬ÈÏ·Ö×é
+                //Â½Â«ÃŠÃ½Â¾ÃÂ¿Ã¢Ã–ÃÂ¸ÃƒÃ—Ã©ÂµÃ„ÂºÃƒÃ“Ã‘Ã’Ã†Â¶Â¯Ã–ÃÃ„Â¬ÃˆÃÂ·Ã–Ã—Ã©
                 if (!Singleton<UserManager>::Instance().deleteTeam(m_userinfo.userid, oldTeamName))
                 {
                     LOGE("Delete team error, oldTeamName: %s, userid: %s, client: %s", oldTeamName.c_str(), m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
@@ -1358,7 +1326,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
 
         if (!found)
         {
-            //ÌáÊ¾¿Í»§¶Ë·Ö×éÃû²»´æÔÚ
+            //ÃŒÃ¡ÃŠÂ¾Â¿ÃÂ»Â§Â¶Ã‹Â·Ã–Ã—Ã©ÃƒÃ»Â²Â»Â´Ã¦Ã”Ãš
             LOGE("teamname not exist, userid: %d, client: %s", m_userinfo.userid, conn->peerAddress().toIpPort().c_str());
         }
 
@@ -1366,21 +1334,21 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
         //newTeamInfo = writer.write(JsonRoot);
 
         Json::StreamWriterBuilder streamWriterBuilder;
-        //Ïû³ıjsonÖĞµÄ\tºÍ\n·ûºÅ
+        //ÃÃ»Â³Ã½jsonÃ–ÃÂµÃ„\tÂºÃ\nÂ·Ã»ÂºÃ…
         streamWriterBuilder.settings_["indentation"] = "";
         newTeamInfo = Json::writeString(streamWriterBuilder, jsonRoot);
     }
-    //ĞŞ¸Ä·Ö×éÃû
+    //ÃÃÂ¸Ã„Â·Ã–Ã—Ã©ÃƒÃ»
     else
     {
         if (oldTeamName == DEFAULT_TEAMNAME)
         {
-            //Ä¬ÈÏ·Ö×é²»ÔÊĞíĞŞ¸Ä
-            //TODO: ÌáÊ¾¿Í»§¶Ë
+            //Ã„Â¬ÃˆÃÂ·Ã–Ã—Ã©Â²Â»Ã”ÃŠÃÃ­ÃÃÂ¸Ã„
+            //TODO: ÃŒÃ¡ÃŠÂ¾Â¿ÃÂ»Â§Â¶Ã‹
             return;
         }
         
-        //ĞŞ¸Ä·Ö×éÃû
+        //ÃÃÂ¸Ã„Â·Ã–Ã—Ã©ÃƒÃ»
         bool found = false;
         uint32_t teamCount = jsonRoot.size();
         for (uint32_t i = 0; i < teamCount; ++i)
@@ -1396,7 +1364,7 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
 
         if (!found)
         {
-            //ÌáÊ¾¿Í»§¶Ë·Ö×éÃû²»´æÔÚ
+            //ÃŒÃ¡ÃŠÂ¾Â¿ÃÂ»Â§Â¶Ã‹Â·Ã–Ã—Ã©ÃƒÃ»Â²Â»Â´Ã¦Ã”Ãš
         }
 
         if (!Singleton<UserManager>::Instance().modifyTeamName(m_userinfo.userid, newTeamName, oldTeamName))
@@ -1413,10 +1381,10 @@ void ChatSession::onUpdateTeamInfoResponse(int32_t operationType, const std::str
         newTeamInfo = Json::writeString(streamWriterBuilder, jsonRoot);
     }
  
-    //±£´æµ½Êı¾İ¿âÀïÃæÈ¥£¨¸öÈËĞÅÏ¢±í£©ºÍ¸üĞÂÄÚ´æÖĞµÄ·Ö×éĞÅÏ¢
+    //Â±Â£Â´Ã¦ÂµÂ½ÃŠÃ½Â¾ÃÂ¿Ã¢Ã€Ã¯ÃƒÃ¦ÃˆÂ¥Â£Â¨Â¸Ã¶ÃˆÃ‹ÃÃ…ÃÂ¢Â±Ã­Â£Â©ÂºÃÂ¸Ã¼ÃÃ‚Ã„ÃšÂ´Ã¦Ã–ÃÂµÃ„Â·Ã–Ã—Ã©ÃÃ…ÃÂ¢
     if (!Singleton<UserManager>::Instance().updateUserTeamInfoInDbAndMemory(m_userinfo.userid, newTeamInfo))
     {
-        //TODO: Ê§°ÜÓ¦´ğ¿Í»§¶Ë
+        //TODO: ÃŠÂ§Â°ÃœÃ“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹
         LOGE("Update team info failed, userid: %d, , newTeamInfo: %s, , client: %s", m_userinfo.userid, newTeamInfo.c_str(), conn->peerAddress().toIpPort().c_str());
         return;
     }
@@ -1435,7 +1403,7 @@ void ChatSession::onModifyMarknameResponse(int32_t friendid, const std::string& 
 {
     if (!Singleton<UserManager>::Instance().updateMarknameInDb(m_userinfo.userid, friendid, newmarkname))
     {
-        //TODO: Ê§°ÜÓ¦´ğ¿Í»§¶Ë
+        //TODO: ÃŠÂ§Â°ÃœÃ“Â¦Â´Ã°Â¿ÃÂ»Â§Â¶Ã‹
         LOGE("Update markname failed, userid: %d, friendid: %d, client: %s", m_userinfo.userid, friendid, conn->peerAddress().toIpPort().c_str());
         return;
     }
@@ -1455,15 +1423,15 @@ void ChatSession::onMoveFriendToOtherTeamResponse(int32_t friendid, const std::s
     if (newteamname.empty() || oldteamname.empty() || newteamname == oldteamname)
     {
         LOGE("Failed to move to other team, newteamname or oldteamname is invalid, userid: %d, friendid:%d, client: %s", m_userinfo.userid, friendid, conn->peerAddress().toIpPort().c_str());
-        //TODO: Í¨Öª¿Í»§¶Ë
+        //TODO: ÃÂ¨Ã–ÂªÂ¿ÃÂ»Â§Â¶Ã‹
         return;
     }
     
-    //²»ÊÇÄãµÄºÃÓÑ£¬²»ÄÜ²Ù×÷
+    //Â²Â»ÃŠÃ‡Ã„Ã£ÂµÃ„ÂºÃƒÃ“Ã‘Â£Â¬Â²Â»Ã„ÃœÂ²Ã™Ã—Ã·
     if (!Singleton<UserManager>::Instance().isFriend(m_userinfo.userid, friendid))
     {
         LOGE("Failed to move to other team, not your friend, userid: %d, friendid: %d, client: %s", m_userinfo.userid, friendid, conn->peerAddress().toIpPort().c_str());
-        //TODO: Í¨Öª¿Í»§¶Ë
+        //TODO: ÃÂ¨Ã–ÂªÂ¿ÃÂ»Â§Â¶Ã‹
         return;
     }
 
@@ -1471,7 +1439,7 @@ void ChatSession::onMoveFriendToOtherTeamResponse(int32_t friendid, const std::s
     if (!Singleton<UserManager>::Instance().getUserInfoByUserId(m_userinfo.userid, currentUser))
     {
         LOGE("User not exist in memory, userid: %d", m_userinfo.userid);
-        //TODO: Í¨Öª¿Í»§¶Ë
+        //TODO: ÃÂ¨Ã–ÂªÂ¿ÃÂ»Â§Â¶Ã‹
         return;
     }
 
@@ -1547,18 +1515,18 @@ void ChatSession::onMoveFriendToOtherTeamResponse(int32_t friendid, const std::s
 void ChatSession::deleteFriend(const std::shared_ptr<TcpConnection>& conn, int32_t friendid)
 {
     /**
-    *  ²Ù×÷ºÃÓÑ£¬°üÀ¨¼ÓºÃÓÑ¡¢É¾³ıºÃÓÑ
+    *  Â²Ã™Ã—Ã·ÂºÃƒÃ“Ã‘Â£Â¬Â°Ã¼Ã€Â¨Â¼Ã“ÂºÃƒÃ“Ã‘Â¡Â¢Ã‰Â¾Â³Ã½ÂºÃƒÃ“Ã‘
     **/
     /*
-    //typeÎª1·¢³ö¼ÓºÃÓÑÉêÇë 2 ÊÕµ½¼ÓºÃÓÑÇëÇó(½ö¿Í»§¶ËÊ¹ÓÃ) 3Ó¦´ğ¼ÓºÃÓÑ 4É¾³ıºÃÓÑÇëÇó 5Ó¦´ğÉ¾³ıºÃÓÑ
-    //µ±type=3Ê±£¬acceptÊÇ±ØĞë×Ö¶Î£¬0¶Ô·½¾Ü¾ø£¬1¶Ô·½½ÓÊÜ
+    //typeÃÂª1Â·Â¢Â³Ã¶Â¼Ã“ÂºÃƒÃ“Ã‘Ã‰ÃªÃ‡Ã« 2 ÃŠÃ•ÂµÂ½Â¼Ã“ÂºÃƒÃ“Ã‘Ã‡Ã«Ã‡Ã³(Â½Ã¶Â¿ÃÂ»Â§Â¶Ã‹ÃŠÂ¹Ã“Ãƒ) 3Ã“Â¦Â´Ã°Â¼Ã“ÂºÃƒÃ“Ã‘ 4Ã‰Â¾Â³Ã½ÂºÃƒÃ“Ã‘Ã‡Ã«Ã‡Ã³ 5Ã“Â¦Â´Ã°Ã‰Â¾Â³Ã½ÂºÃƒÃ“Ã‘
+    //ÂµÂ±type=3ÃŠÂ±Â£Â¬acceptÃŠÃ‡Â±Ã˜ÃÃ«Ã—Ã–Â¶ÃÂ£Â¬0Â¶Ã”Â·Â½Â¾ÃœÂ¾Ã¸Â£Â¬1Â¶Ã”Â·Â½Â½Ã“ÃŠÃœ
     cmd = 1005, seq = 0, {"userid": 9, "type": 1}
     cmd = 1005, seq = 0, {"userid": 9, "type": 2, "username": "xxx"}
     cmd = 1005, seq = 0, {"userid": 9, "type": 3, "username": "xxx", "accept": 1}
 
-    //·¢ËÍ
+    //Â·Â¢Ã‹Ã
     cmd = 1005, seq = 0, {"userid": 9, "type": 4}
-    //Ó¦´ğ
+    //Ã“Â¦Â´Ã°
     cmd = 1005, seq = 0, {"userid": 9, "type": 5, "username": "xxx"}
     **/
 
@@ -1568,7 +1536,7 @@ void ChatSession::deleteFriend(const std::shared_ptr<TcpConnection>& conn, int32
         return;
     }
 
-    //¸üĞÂÒ»ÏÂµ±Ç°ÓÃ»§µÄ·Ö×éĞÅÏ¢
+    //Â¸Ã¼ÃÃ‚Ã’Â»ÃÃ‚ÂµÂ±Ã‡Â°Ã“ÃƒÂ»Â§ÂµÃ„Â·Ã–Ã—Ã©ÃÃ…ÃÂ¢
     User cachedUser;
     if (!Singleton<UserManager>::Instance().getUserInfoByUserId(friendid, cachedUser))
     {
@@ -1583,21 +1551,21 @@ void ChatSession::deleteFriend(const std::shared_ptr<TcpConnection>& conn, int32
     }
     
     char szData[256] = { 0 };
-    //·¢¸øÖ÷¶¯É¾³ıµÄÒ»·½
+    //Â·Â¢Â¸Ã¸Ã–Ã·Â¶Â¯Ã‰Â¾Â³Ã½ÂµÃ„Ã’Â»Â·Â½
     //{"userid": 9, "type": 1, }        
     snprintf(szData, 256, "{\"userid\":%d, \"type\":5, \"username\": \"%s\"}", friendid, cachedUser.username.c_str());
     send(msg_type_operatefriend, m_seq, szData, strlen(szData));
 
-    LOGI("send to client: userid£º %d, cmd=msg_type_operatefriend, data: %s", m_userinfo.userid, szData);
+    LOGI("send to client: useridÂ£Âº %d, cmd=msg_type_operatefriend, data: %s", m_userinfo.userid, szData);
 
-    //·¢¸ø±»É¾³ıµÄÒ»·½
-    //É¾³ıºÃÓÑÏûÏ¢
+    //Â·Â¢Â¸Ã¸Â±Â»Ã‰Â¾Â³Ã½ÂµÃ„Ã’Â»Â·Â½
+    //Ã‰Â¾Â³Ã½ÂºÃƒÃ“Ã‘ÃÃ»ÃÂ¢
     if (friendid < GROUPID_BOUBDARY)
     {
-        //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+        //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
         std::list<std::shared_ptr<ChatSession>>targetSessions;
         Singleton<ChatServer>::Instance().getSessionsByUserId(targetSessions, friendid);
-        //½ö¸øÔÚÏßÓÃ»§ÍÆËÍÕâ¸öÏûÏ¢
+        //Â½Ã¶Â¸Ã¸Ã”ÃšÃÃŸÃ“ÃƒÂ»Â§ÃÃ†Ã‹ÃÃ•Ã¢Â¸Ã¶ÃÃ»ÃÂ¢
         if (!targetSessions.empty())
         {
             memset(szData, 0, sizeof(szData));
@@ -1614,14 +1582,14 @@ void ChatSession::deleteFriend(const std::shared_ptr<TcpConnection>& conn, int32
         return;
     }
     
-    //ÍËÈºÏûÏ¢
-    //¸øÆäËûÔÚÏßÈº³ÉÔ±ÍÆËÍÈºĞÅÏ¢·¢Éú±ä»¯µÄÏûÏ¢
+    //ÃÃ‹ÃˆÂºÃÃ»ÃÂ¢
+    //Â¸Ã¸Ã†Ã¤Ã‹Ã»Ã”ÃšÃÃŸÃˆÂºÂ³Ã‰Ã”Â±ÃÃ†Ã‹ÃÃˆÂºÃÃ…ÃÂ¢Â·Â¢Ã‰ÃºÂ±Ã¤Â»Â¯ÂµÃ„ÃÃ»ÃÂ¢
     std::list<User> friends;
     Singleton<UserManager>::Instance().getFriendInfoByUserId(friendid, friends);
     ChatServer& imserver = Singleton<ChatServer>::Instance();
     for (const auto& iter : friends)
     {
-        //ÏÈ¿´Ä¿±êÓÃ»§ÊÇ·ñÔÚÏß
+        //ÃÃˆÂ¿Â´Ã„Â¿Â±ÃªÃ“ÃƒÂ»Â§ÃŠÃ‡Â·Ã±Ã”ÃšÃÃŸ
         std::list<std::shared_ptr<ChatSession>> targetSessions;
         imserver.getSessionsByUserId(targetSessions, iter.userid);
         if (!targetSessions.empty())
@@ -1647,7 +1615,7 @@ void ChatSession::makeUpFriendListInfo(std::string& friendinfo, const std::share
     [
     {
     "teamindex": 0,
-    "teamname": "ÎÒµÄºÃÓÑ",
+    "teamname": "ÃÃ’ÂµÃ„ÂºÃƒÃ“Ã‘",
     "members": [
     {
     "userid": 1,
@@ -1655,7 +1623,7 @@ void ChatSession::makeUpFriendListInfo(std::string& friendinfo, const std::share
     },
     {
     "userid": 2,
-    "markname": "ÕÅxx"
+    "markname": "Ã•Ã…xx"
     }
     ]
     }
@@ -1691,7 +1659,7 @@ void ChatSession::makeUpFriendListInfo(std::string& friendinfo, const std::share
         return;
     }
 
-    // ½âÎö·Ö×éĞÅÏ¢£¬Ìí¼ÓºÃÓÑÆäËûĞÅÏ¢
+    // Â½Ã¢ÃÃ¶Â·Ã–Ã—Ã©ÃÃ…ÃÂ¢Â£Â¬ÃŒÃ­Â¼Ã“ÂºÃƒÃ“Ã‘Ã†Ã¤Ã‹Ã»ÃÃ…ÃÂ¢
     uint32_t teamCount = jsonRoot.size();
     int32_t userid = 0;
 
@@ -1737,7 +1705,7 @@ void ChatSession::makeUpFriendListInfo(std::string& friendinfo, const std::share
         
     }// end outer for - loop
 
-    //JsonRoot.toStyledString()·µ»ØµÄÊÇ¸ñÊ½»¯ºÃµÄjson£¬²»ÊµÓÃ
+    //JsonRoot.toStyledString()Â·ÂµÂ»Ã˜ÂµÃ„ÃŠÃ‡Â¸Ã±ÃŠÂ½Â»Â¯ÂºÃƒÂµÃ„jsonÂ£Â¬Â²Â»ÃŠÂµÃ“Ãƒ
     //friendinfo = JsonRoot.toStyledString();
     //Json::FastWriter writer;
     //friendinfo = writer.write(JsonRoot); 
@@ -1750,11 +1718,11 @@ void ChatSession::makeUpFriendListInfo(std::string& friendinfo, const std::share
 bool ChatSession::modifyChatMsgLocalTimeToServerTime(const std::string& chatInputJson, std::string& chatOutputJson)
 {
     /*
-        ÏûÏ¢¸ñÊ½£º
+        ÃÃ»ÃÂ¢Â¸Ã±ÃŠÂ½Â£Âº
         {
-            "msgType": 1, //ÏûÏ¢ÀàĞÍ 0Î´ÖªÀàĞÍ 1ÎÄ±¾ 2´°¿Ú¶¶¶¯ 3ÎÄ¼ş
+            "msgType": 1, //ÃÃ»ÃÂ¢Ã€Ã ÃÃ 0ÃÂ´Ã–ÂªÃ€Ã ÃÃ 1ÃÃ„Â±Â¾ 2Â´Â°Â¿ÃšÂ¶Â¶Â¶Â¯ 3ÃÃ„Â¼Ã¾
             "time": 2434167,
-            "clientType": 0,		//0Î´Öª 1pc¶Ë 2Æ»¹û¶Ë 3°²×¿¶Ë
+            "clientType": 0,		//0ÃÂ´Ã–Âª 1pcÂ¶Ã‹ 2Ã†Â»Â¹Ã»Â¶Ã‹ 3Â°Â²Ã—Â¿Â¶Ã‹
             "font":["fontname", fontSize, fontColor, fontBold, fontItalic, fontUnderline],
             "content":
             [
@@ -1765,7 +1733,7 @@ bool ChatSession::modifyChatMsgLocalTimeToServerTime(const std::string& chatInpu
                 {"pic": ["name", "server_path", 400, w, h]},
                 {"remotedesktop": 1},
                 {"shake": 1},
-                {"file":["name", "server_path", 400, onlineflag]}		//onlineflagÎª0ÊÇÀëÏßÎÄ¼ş£¬²»Îª0ÎªÔÚÏßÎÄ¼ş
+                {"file":["name", "server_path", 400, onlineflag]}		//onlineflagÃÂª0ÃŠÃ‡Ã€Ã«ÃÃŸÃÃ„Â¼Ã¾Â£Â¬Â²Â»ÃÂª0ÃÂªÃ”ÃšÃÃŸÃÃ„Â¼Ã¾
             ]
         }
     */
@@ -1792,7 +1760,7 @@ bool ChatSession::modifyChatMsgLocalTimeToServerTime(const std::string& chatInpu
     //Json::FastWriter writer;
     //chatOutputJson = writer.write(JsonRoot);
     Json::StreamWriterBuilder streamWriterBuilder;
-    //Ïû³ıjsonÖĞµÄ\tºÍ\n·ûºÅ
+    //ÃÃ»Â³Ã½jsonÃ–ÃÂµÃ„\tÂºÃ\nÂ·Ã»ÂºÃ…
     streamWriterBuilder.settings_["indentation"] = "";
     chatOutputJson = Json::writeString(streamWriterBuilder, jsonRoot);
 
@@ -1804,7 +1772,7 @@ void ChatSession::enableHearbeatCheck()
     std::shared_ptr<TcpConnection> conn = getConnectionPtr();
     if (conn)
     {        
-        //Ã¿15ÃëÖÓ¼ì²âÒ»ÏÂÊÇ·ñÓĞµôÏßÏÖÏó
+        //ÃƒÂ¿15ÃƒÃ«Ã–Ã“Â¼Ã¬Â²Ã¢Ã’Â»ÃÃ‚ÃŠÃ‡Â·Ã±Ã“ÃÂµÃ´ÃÃŸÃÃ–ÃÃ³
         m_checkOnlineTimerId = conn->getLoop()->runEvery(15000000, std::bind(&ChatSession::checkHeartbeat, this, conn));
     }
 }

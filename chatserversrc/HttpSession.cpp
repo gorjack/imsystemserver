@@ -1,5 +1,4 @@
-/**
- * Http会话类, HttpSession.cpp
+/** Http会话类, HttpSession.cpp
  * zhangyl 2018.05.16
  */
 #include "HttpSession.h"

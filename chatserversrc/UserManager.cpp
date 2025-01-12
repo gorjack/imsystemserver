@@ -1,7 +1,3 @@
-/**
- *  管理所有的用户信息，初始信息从数据库中加载, UserManager.h
- *  zhangyl 2017.03.15
- **/
 #include "UserManager.h"
 #include <memory>
 #include <sstream>
@@ -28,11 +24,11 @@ bool UserManager::init(const char* dbServer, const char* dbUserName, const char*
         m_strDbPassword = dbPassword;
     m_strDbName = dbName;
 
-    //从数据库中加载所有用户信息
+    //麓脫脢媒戮脻驴芒脰脨录脫脭脴脣霉脫脨脫脙禄搂脨脜脧垄
     if (!loadUsersFromDb())
         return false;
 
-    //TODO: 当用户比较多，这个循环比较慢，优化之
+    //TODO: 碌卤脫脙禄搂卤脠陆脧露脿拢卢脮芒赂枚脩颅禄路卤脠陆脧脗媒拢卢脫脜禄炉脰庐
     for (auto& iter : m_allCachedUsers)
     {
         if (!loadRelationshipFromDb(iter.userid, iter.friends))
@@ -56,7 +52,7 @@ bool UserManager::loadUsersFromDb()
         return false;
     }
 
-    //TODO: 到底是空数据集还是出错，需要修改下返回类型
+    //TODO: 碌陆碌脳脢脟驴脮脢媒戮脻录炉禄鹿脢脟鲁枚麓铆拢卢脨猫脪陋脨脼赂脛脧脗路碌禄脴脌脿脨脥
     QueryResult* pResult = pConn->query("SELECT f_user_id, f_username, f_nickname, f_password,  f_facetype, f_customface, f_gender, f_birthday, f_signature, f_address, f_phonenumber, f_mail, f_teaminfo FROM t_user ORDER BY  f_user_id DESC");
     if (NULL == pResult)
     {
@@ -89,11 +85,11 @@ bool UserManager::loadUsersFromDb()
 
         LOGI("userid: %d, username: %s, password: %s, nickname: %s, signature: %s", u.userid, u.username.c_str(), u.password.c_str(), u.nickname.c_str(), u.signature.c_str());
         
-        //计算当前最大userid
+        //录脝脣茫碌卤脟掳脳卯麓贸userid
         if (u.userid < GROUPID_BOUBDARY && u.userid > m_baseUserId)
             m_baseUserId = u.userid;
 
-        //计算当前最大群组id
+        //录脝脣茫碌卤脟掳脳卯麓贸脠潞脳茅id
         if (u.userid > GROUPID_BOUBDARY && u.userid > m_baseGroupId)
             m_baseGroupId = u.userid;
 
@@ -130,7 +126,7 @@ bool UserManager::addUser(User& u)
         LOGW("insert user error, sql: %s", sql);
         return false;
     }
-    //设置一些字段的默认值
+    //脡猫脰脙脪禄脨漏脳脰露脦碌脛脛卢脠脧脰碌
     u.userid = m_baseUserId;
     u.facetype = 0;
     u.birthday = 19900101;
@@ -145,7 +141,7 @@ bool UserManager::addUser(User& u)
     return true;
 }
 
-//数据库里面互为好友的两个人id，小者在先，大者在后
+//脢媒戮脻驴芒脌茂脙忙禄楼脦陋潞脙脫脩碌脛脕陆赂枚脠脣id拢卢脨隆脮脽脭脷脧脠拢卢麓贸脮脽脭脷潞贸
 bool UserManager::makeFriendRelationshipInDB(int32_t smallUserid, int32_t greaterUserid)
 {
     if (smallUserid == greaterUserid)
@@ -515,7 +511,7 @@ bool UserManager::updateUserTeamInfoInDbAndMemory(int32_t userid, const std::str
 
     LOGI("update user teaminfo successfully, userid: %d, sql: %s", userid, osSql.str().c_str());
 
-    //TODO: 重复的代码，需要去掉
+    //TODO: 脰脴赂麓碌脛麓煤脗毛拢卢脨猫脪陋脠楼碌么
     std::lock_guard<std::mutex> guard(m_mutex);
     for (auto& iter : m_allCachedUsers)
     {
@@ -673,7 +669,6 @@ bool UserManager::updateMarknameInDb(int32_t userid, int32_t friendid, const std
 
     LOGI("update markname successfully, userid: %d, friendid: %d, sql: %s", userid, friendid, osSql.str().c_str());
 
-    //TODO: 重复的代码，需要去掉
     std::lock_guard<std::mutex> guard(m_mutex);
     std::set<FriendInfo> friends;
     for (auto& iter : m_allCachedUsers)
@@ -730,7 +725,6 @@ bool UserManager::moveFriendToOtherTeam(int32_t userid, int32_t friendid, const 
 
     LOGI("MoveFriendToOtherTeam db operation successfully, userid: %d, friendid: %d, sql: %s" , userid, friendid, osSql.str().c_str());
 
-    //改变内存中用户的分组信息
     User* u = NULL;
     if (!getUserInfoByUserId(userid, u) || u == NULL)
     {
@@ -857,7 +851,6 @@ bool UserManager::getFriendInfoByUserId(int32_t userid, std::list<User>& friends
 {
     std::list<FriendInfo> friendInfo;
     std::lock_guard<std::mutex> guard(m_mutex);
-    //先找到friends的id列表
     for (const auto& iter : m_allCachedUsers)
     {
         if (iter.userid == userid)
@@ -867,8 +860,6 @@ bool UserManager::getFriendInfoByUserId(int32_t userid, std::list<User>& friends
         }
     }
 
-    //再通过每个friendid找到对应的User集合
-    //TODO: 这种算法效率太低
     for (const auto& iter : friendInfo)
     {
         User u;
@@ -890,7 +881,6 @@ bool UserManager::getFriendMarknameByUserId(int32_t userid1, int32_t friendid, s
 {
     std::list<FriendInfo> friendInfo;
     std::lock_guard<std::mutex> guard(m_mutex);
-    //先找到friends的id列表
     for (const auto& iter : m_allCachedUsers)
     {
         if (iter.userid == userid1)

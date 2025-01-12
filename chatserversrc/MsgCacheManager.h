@@ -1,7 +1,3 @@
-/** 
- *  消息缓存类， MsgCacheManager.h
- *  zhangyl 2017.03.16
- **/
 #pragma once
 #include <list>
 #include <stdint.h>
@@ -37,8 +33,8 @@ public:
 
 
 private:
-    std::list<NotifyMsgCache>       m_listNotifyMsgCache;    //通知类消息缓存，比如加好友消息
+    std::list<NotifyMsgCache>       m_listNotifyMsgCache;    //脥篓脰陋脌脿脧没脧垄禄潞麓忙拢卢卤脠脠莽录脫潞脙脫脩脧没脧垄
     std::mutex                      m_mtNotifyMsgCache;
-    std::list<ChatMsgCache>         m_listChatMsgCache;      //聊天消息缓存
+    std::list<ChatMsgCache>         m_listChatMsgCache;      //脕脛脤矛脧没脧垄禄潞麓忙
     std::mutex                      m_mtChatMsgCache;
 };

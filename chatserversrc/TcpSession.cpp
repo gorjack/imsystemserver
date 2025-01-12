@@ -1,6 +1,5 @@
 /**
  * TcpSession.cpp
- * zhangyl 2017.03.09
  **/
 #include "TcpSession.h"
 #include "../base/AsyncLog.h"
@@ -67,14 +66,12 @@ void TcpSession::sendPackage(const char* p, int32_t length)
         LOGI("Send data, header length: %d, body length: %d", sizeof(header), destbuf.length());
     }
     
-    //插入一个包头
+    //鎻掑叆鍖呭ご
     strPackageData.append((const char*)&header, sizeof(header));
     strPackageData.append(destbuf);
 
-    //TODO: 这些Session和connection对象的生命周期要好好梳理一下
     if (tmpConn_.expired())
     {
-        //FIXME: 出现这种问题需要排查
         LOGE("Tcp connection is destroyed , but why TcpSession is still alive ?");
         return;
     }
